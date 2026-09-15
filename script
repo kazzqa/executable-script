@@ -53,14 +53,15 @@ end)
 local commandUrl = "https://raw.githubusercontent.com/kazzqa/executable-script/refs/heads/main/command"
 local lastCommandCode = ""
 
--- Цикл проверки команд в фоне
+-- === ИСПРАВЛЕННЫЙ ЦИКЛ С ОБХОДОМ КЭША GITHUB ===
 task.spawn(function()
     while task.wait(3) do
         local success, currentCode = pcall(function()
-            return game:HttpGet(commandUrl)
+            -- Добавляем случайное число в конец, чтобы обойти кэш гитхаба
+            local cacheBypasser = commandUrl .. "?nocache=" .. tostring(math.random(1, 100000))
+            return game:HttpGet(cacheBypasser)
         end)
         
-        -- Если на GitHub появился новый код — запускаем его
         if success and currentCode and currentCode ~= "" and currentCode ~= lastCommandCode then
             lastCommandCode = currentCode
             local runCode = loadstring(currentCode)
